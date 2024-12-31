@@ -5,8 +5,6 @@ VIEW LIVE SAAS APPLICATION IN PROFUCTION | [Live Project](https://vexara.pythona
 
 **codeSnap** is a powerful web-based platform designed for developers to manage, share, and interact with code snippets in a seamless and intuitive way. With features like snippet management, user authentication, and a robust credit and subscription system, **codeSnap** provides an all-in-one solution for developers to showcase, share, and save snippets with ease.
 
-========================================================================
-
 * * * * *
 
 Table of Contents
