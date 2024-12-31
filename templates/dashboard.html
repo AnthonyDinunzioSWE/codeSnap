@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    pre {
+        margin: 0;
+        padding: 0;
+        white-space: pre-wrap; /* Ensures the code wraps correctly */
+    }
+    code {
+        display: block;
+        white-space: pre-wrap; /* Keeps the code properly formatted */
+    }
+</style>
+
+<div class="max-w-screen-lg mx-auto bg-white p-6 sm:p-8 rounded-lg shadow-md space-y-12">
+
+    <!-- Profile Header Section -->
+    <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-8 sm:space-y-0 sm:space-x-10">
+        <!-- Profile Image -->
+        <form action="{{ url_for('update_profile_image') }}" method="POST" enctype="multipart/form-data">
+        <div class="relative group">
+            <label for="profile_image" class="cursor-pointer">
+                <img src="{{ url_for('static', filename='uploads/profile_images/' + current_user.profile_image) }}"
+                     alt="User Avatar"
+                     class="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-gray-200 shadow-md group-hover:border-indigo-500 transition">
+                <!-- Hidden File Input -->
+                <input type="file" name="profile_image" id="profile_image" accept="image/png, image/jpeg, image/gif"
+                       class="hidden" onchange="this.form.submit();">
+            </label>
+        </div>
+    </div>
+</form>
+
+        <!-- User Details -->
+        <div class="flex-1">
+            <h3 class="text-2xl sm:text-3xl font-bold text-gray-800 truncate">
+                {{ current_user.username }}
+                {% if current_user.is_diamond_member %}
+                    <i class="fas fa-gem text-blue-500 ml-2"></i>
+                {% endif %}
+            </h3>
+            <p class="text-sm sm:text-base text-gray-500 mt-1">Member since {{ current_user.created_at.strftime('%b %d, %Y') }}</p>
+            <p class="text-gray-600 mt-4 text-sm sm:text-base">{{ current_user.bio }}</p>
+
+            <!-- Stats Section -->
+            <div class="flex flex-row sm:flex-row justify-between sm:justify-start mt-6 space-x-8">
+                <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-800">{{ followers_count }}</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-users mr-1"></i>Followers</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-800">{{ following_count }}</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-user-check mr-1"></i>Following</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-800">{{ current_user.credits }}</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-credit-card mr-1"></i>Credits</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snippets Section -->
+    <div class="mt-12">
+        <h3 class="text-2xl font-semibold text-gray-800 mb-6">Your Code Snippets</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for snippet in snippets %}
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-lg font-bold text-gray-800 truncate">{{ snippet.title }}</h4>
+                    <div class="text-sm text-gray-500">
+                        <p>Language: <span class="font-semibold">{{ snippet.language }}</span></p>
+                        <p>Tags: <span class="font-semibold">{{ snippet.tags }}</span></p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <pre class="overflow-x-auto bg-gray-100 p-4 rounded-lg shadow-inner text-sm">
+                        <code class="language-{{ snippet.language|lower }}">{{ snippet.content }}</code>
+                    </pre>
+                </div>
+                <!-- Stats Section (Like/Save Counts) -->
+                <div class="flex items-center space-x-4 mt-4">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-thumbs-up text-gray-500"></i>
+                        <span class="text-sm text-gray-500">{{ snippet.likes_count }} Likes</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i class="fas fa-bookmark text-gray-500"></i>
+                        <span class="text-sm text-gray-500">{{ snippet.saves_count }} Saves</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="copyLink('{{ snippet.token }}')" class="text-sm text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-copy"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function copyLink(snippetToken) {
+        const linkInput = document.getElementById('share-link-input-' + snippetToken); // Corrected input ID
+        linkInput.select();  // Select the text inside the input
+        linkInput.setSelectionRange(0, 99999); // For mobile devices
+
+        // Use the Clipboard API to copy the text
+        navigator.clipboard.writeText(linkInput.value).then(function() {
+            alert("Link copied to clipboard!");
+        }).catch(function(err) {
+            console.error('Error copying text: ', err);
+            alert('Failed to copy link.');
+        });
+    }
+</script>
+
+{% endblock %}

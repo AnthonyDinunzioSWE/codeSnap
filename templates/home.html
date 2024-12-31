@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    pre {
+        margin: 0;
+        padding: 0;
+        white-space: pre-wrap; /* Ensures the code wraps correctly */
+    }
+    code {
+        display: block;
+        white-space: pre-wrap; /* Keeps the code properly formatted */
+    }
+</style>
+
+<div class="max-w-7xl mx-auto p-6 sm:p-8 space-y-12">
+
+    <!-- Welcome Section -->
+    <div class="text-center">
+        <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
+            Welcome to CodeSnippet Manager
+        </h1>
+        <p class="mt-4 text-lg sm:text-xl text-gray-600">
+            A place to discover, like, save, and share amazing code snippets.
+        </p>
+    </div>
+
+    <!-- Snippets Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for snippet in snippets|reverse %}
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-transform transform hover:scale-105 flex flex-col justify-between">
+
+            <!-- Header with User Info -->
+            <div class="flex items-center p-4 border-b border-gray-200">
+                <a href="{{ url_for('view_profile', id=snippet.user.id) }}" class="flex items-center space-x-3">
+                    <img src="{{ url_for('static', filename='uploads/profile_images/' + snippet.user.profile_image) }}"
+                         alt="User Avatar"
+                         class="w-10 h-10 rounded-full object-cover">
+                    <div>
+                        <p class="font-semibold text-gray-800 truncate">
+                            {{ snippet.user.username }}
+                            {% if snippet.user.is_diamond_member %}
+                                <i class="fas fa-gem text-blue-500 ml-1"></i>
+                            {% endif %}
+                        </p>
+                        <p class="text-xs text-gray-500">{{ snippet.language }}</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Snippet Title -->
+            <div class="p-4">
+                <h2 class="text-lg font-semibold text-gray-900 truncate">
+                    {{ snippet.title }}
+                </h2>
+            </div>
+
+            <!-- Syntax Highlighted Code -->
+            <div class="bg-gray-50 rounded-md overflow-hidden p-4">
+                <pre class="text-sm text-gray-800 max-h-48 overflow-y-auto leading-tight">
+                    <code class="language-{{ snippet.language|lower }}" id="snippet-content-{{ snippet.id }}">{{ snippet.content }}</code>
+                </pre>
+            </div>
+
+            <!-- Actions Section -->
+            <div class="p-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                    <span><i class="fas fa-thumbs-up mr-1"></i> {{ snippet.like_count }}</span>
+                    <span><i class="fas fa-bookmark mr-1"></i> {{ snippet.save_count }}</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% if snippet.user_id == current_user.id %}
+                        <a href="{{ url_for('update_snippet', id=snippet.id) }}" class="text-blue-500 hover:underline"><i class="fas fa-edit mr-1"></i></a>
+                        <form action="{{ url_for('delete_snippet', id=snippet.id) }}" method="POST">
+                            <button type="submit" class="text-red-500 hover:underline"><i class="fas fa-trash-alt mr-1"></i></button>
+                        </form>
+                    {% else %}
+                        <!-- Like Button -->
+                        <form action="{{ url_for('like_snippet', id=snippet.id) }}" method="POST">
+                            <button type="submit"
+                                    class="px-3 py-1 bg-gray-100 text-gray-600 rounded-md hover:bg-blue-100 hover:text-blue-600 transition">
+                                {% if snippet.liked_by|selectattr('user_id', 'equalto', current_user.id)|list %}
+                                    <i class="fas fa-thumbs-down mr-1"></i>
+                                {% else %}
+                                    <i class="fas fa-thumbs-up mr-1"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+                        <!-- Save Button -->
+                        <form action="{{ url_for('save_snippet', id=snippet.id) }}" method="POST">
+                            <button type="submit" class="px-3 py-1 bg-gray-100 text-gray-600 rounded-md hover:bg-green-100 hover:text-green-600 transition">
+                                <i class="fas fa-bookmark mr-1"></i>
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                <!-- Copy to Clipboard Button -->
+                <button onclick="copyToClipboard({{ snippet.id }})" class="text-blue-500 hover:underline mt-2">
+                    <i class="fas fa-copy mr-1"></i> Copy Code
+                </button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<script>
+    function copyToClipboard(snippetId) {
+        const snippetContent = document.getElementById('snippet-content-' + snippetId).textContent;
+        const textarea = document.createElement('textarea');
+        textarea.value = snippetContent;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert("Snippet copied to clipboard!");
+    }
+</script>
+
+{% endblock %}

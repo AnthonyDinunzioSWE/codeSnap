@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<body>
+
+    <!-- Container for centering the form -->
+    <div class="min-h-screen flex items-center justify-center bg-gray-100">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-full sm:w-96">
+
+            <!-- Title -->
+            <h1 class="text-3xl font-semibold text-center text-blue-600 mb-8">Create Account</h1>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-4">
+                    <ul>
+                        {% for category, message in messages %}
+                            <li class="text-sm text-red-500">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            {% endwith %}
+
+            <!-- Form -->
+            <form action="{{ url_for('signup') }}" method="POST" class="space-y-6">
+
+                <!-- Username -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input type="text" id="username" name="username" required class="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your username">
+                </div>
+
+                <!-- Email -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" name="email" required class="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your email">
+                </div>
+
+                <!-- Password -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" name="password" required class="mt-2 w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Enter your password">
+                </div>
+
+                <!-- Submit Button -->
+                <div class="mt-6">
+                    <button type="submit" class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Sign Up</button>
+                </div>
+            </form>
+
+            <!-- Alternative login link -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">Already have an account? <a href="{{ url_for('login') }}" class="text-blue-600 hover:text-blue-700">Login here</a></p>
+            </div>
+
+        </div>
+    </div>
+{% endblock %}

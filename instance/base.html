@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>codeSnap - Snippet Platform</title>
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+
+    <!-- TailwindCSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans tracking-wide leading-relaxed">
+
+    <!-- Main Container -->
+    <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        <!-- Header -->
+        <header class="bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4 rounded-lg shadow-md sticky top-0 z-50">
+            <nav class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                    <a href="{{ url_for('home') }}" class="text-white font-bold text-xl">CodeSnap</a>
+                </div>
+                <ul class="hidden md:flex items-center space-x-6">
+                    {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('home') }}" class="text-white hover:text-gray-200"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="/dashboard" class="text-white hover:text-gray-200"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                    <li><a href="{{ url_for('saved_snippets') }}" class="text-white hover:text-gray-200"><i class="fas fa-bookmark"></i> Saved Snippets</a></li>
+                    <li><a href="{{ url_for('create_snippet') }}" class="text-white hover:text-gray-200"><i class="fas fa-plus-circle"></i> Create Snippet</a></li>
+                    {% if current_user.is_diamond_member is not true %}
+                    <li><a href="{{ url_for('subscribe_diamond') }}" class="text-white hover:text-gray-200"><i class="fas fa-gem"></i> Diamond Subscription</a></li>
+                    {% endif %}
+                    {% if current_user.credits <= 0 %}
+                    <li><a href="{{ url_for('purchase_credits') }}" class="text-white hover:text-gray-200"><i class="fas fa-credit-card"></i> Purchase Credits</a></li>
+                    {% endif %}
+                    <li><a href="/logout" class="text-white hover:text-gray-200"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    <li class="relative">
+                        <button id="bell-icon" class="text-white hover:text-gray-200">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <div id="notifications-dropdown" class="absolute hidden right-0 mt-2 bg-white border rounded-md shadow-lg max-h-80 overflow-y-auto w-72">
+                            <div class="p-4 text-gray-800 font-semibold border-b">Notifications</div>
+                            <ul>
+                                {% for notification in notifications %}
+                                <li class="p-4 hover:bg-gray-50 border-b">
+                                    <p class="text-sm text-gray-600">{{ notification.message }}</p>
+                                    <small class="text-xs text-gray-400">{{ notification.created_at }}</small>
+                                    <form action="{{ url_for('mark_notification_read', notification_id=notification.id) }}" method="POST">
+                                        <button type="submit" class="text-blue-500 text-xs mt-1">Mark as Read</button>
+                                    </form>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li><a href="{{ url_for('index') }}" class="text-white hover:text-gray-200"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="/login" class="text-white hover:text-gray-200"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+                    <li><a href="/signup" class="text-white hover:text-gray-200"><i class="fas fa-user-plus"></i> Sign Up</a></li>
+                    {% endif %}
+                </ul>
+                <button class="md:hidden text-white" id="mobile-menu-button">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+            <!-- Mobile Menu -->
+            <div id="mobile-menu" class="hidden md:hidden mt-4 space-y-2">
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('home') }}" class="block text-white"><i class="fas fa-home"></i> Home</a>
+                <a href="/dashboard" class="block text-white"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <a href="{{ url_for('saved_snippets') }}" class="block text-white"><i class="fas fa-bookmark"></i> Saved Snippets</a>
+                <a href="{{ url_for('create_snippet') }}" class="block text-white"><i class="fas fa-plus-circle"></i> Create Snippet</a>
+                {% if current_user.is_diamond_member is not true %}
+                <a href="{{ url_for('subscribe_diamond') }}" class="block text-white"><i class="fas fa-gem"></i> Diamond Subscription</a>
+                {% endif %}
+                {% if current_user.credits <= 0 %}
+                <a href="{{ url_for('purchase_credits') }}" class="block text-white"><i class="fas fa-credit-card"></i> Purchase Credits</a>
+                {% endif %}
+                <a href="/logout" class="block text-white"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                {% else %}
+                <a href="{{ url_for('index') }}" class="block text-white"><i class="fas fa-home"></i> Home</a>
+                <a href="/login" class="block text-white"><i class="fas fa-sign-in-alt"></i> Login</a>
+                <a href="/signup" class="block text-white"><i class="fas fa-user-plus"></i> Sign Up</a>
+                {% endif %}
+            </div>
+        </header>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="space-y-2 mt-4">
+            {% for category, message in messages %}
+            <div class="p-4 bg-red-100 text-red-700 rounded-lg">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Main Content -->
+        <main class="mt-6">
+            {% block content %}
+            {% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="mt-10 bg-gray-800 py-6 text-center text-gray-300 text-sm">
+            &copy; 2024 CodeSnippet Manager - All Rights Reserved.
+        </footer>
+    </div>
+
+    <script>
+        // Mobile Menu Toggle
+        const mobileMenuButton = document.getElementById('mobile-menu-button');
+        const mobileMenu = document.getElementById('mobile-menu');
+
+        mobileMenuButton.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Notifications Dropdown
+        const bellIcon = document.getElementById('bell-icon');
+        const notificationsDropdown = document.getElementById('notifications-dropdown');
+
+        bellIcon.addEventListener('click', (event) => {
+            event.stopPropagation();
+            notificationsDropdown.classList.toggle('hidden');
+        });
+
+        document.addEventListener('click', () => {
+            if (!notificationsDropdown.classList.contains('hidden')) {
+                notificationsDropdown.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    pre {
+        margin: 0;
+        padding: 0;
+        white-space: pre-wrap; /* Ensures the code wraps correctly */
+    }
+    code {
+        display: block;
+        white-space: pre-wrap; /* Keeps the code properly formatted */
+    }
+</style>
+
+<div class="max-w-screen-lg mx-auto bg-white p-6 sm:p-8 rounded-lg shadow-md space-y-12">
+
+    <!-- Profile Header Section -->
+    <div class="flex flex-col sm:flex-row items-center sm:items-start space-y-8 sm:space-y-0 sm:space-x-10">
+        <!-- Profile Image -->
+        <form action="{{ url_for('update_profile_image') }}" method="POST" enctype="multipart/form-data">
+        <div class="relative group">
+            <label for="profile_image" class="cursor-pointer">
+                <img src="{{ url_for('static', filename='uploads/profile_images/' + user.profile_image) }}"
+                     alt="{{ user.username }}'s Avatar"
+                     class="w-32 h-32 sm:w-40 sm:h-40 rounded-full object-cover border-4 border-gray-200 shadow-md group-hover:border-indigo-500 transition">
+                <!-- Hidden File Input -->
+                <input type="file" name="profile_image" id="profile_image" accept="image/png, image/jpeg, image/gif"
+                       class="hidden" onchange="this.form.submit();">
+            </label>
+        </div>
+    </div>
+</form>
+
+        <!-- User Details -->
+        <div class="flex-1">
+            <h3 class="text-2xl sm:text-3xl font-bold text-gray-800 truncate">
+                {{ user.username }}
+                {% if user.is_diamond_member %}
+                    <i class="fas fa-gem text-blue-500 ml-2"></i>
+                {% endif %}
+            </h3>
+            <p class="text-sm sm:text-base text-gray-500 mt-1">Member since {{ user.created_at.strftime('%b %d, %Y') }}</p>
+            <p class="text-gray-600 mt-4 text-sm sm:text-base">{{ user.bio }}</p>
+
+            <!-- Stats Section -->
+            <div class="flex flex-row sm:flex-row justify-between sm:justify-start mt-6 space-x-8">
+                <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-800">{{ followers_count }}</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-users mr-1"></i>Followers</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-800">{{ following_count }}</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-user-check mr-1"></i>Following</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-lg font-semibold text-gray-800">{{ user.credits }}</p>
+                    <p class="text-sm text-gray-500"><i class="fas fa-credit-card mr-1"></i>Credits</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snippets Section -->
+    <div class="mt-12">
+        <h3 class="text-2xl font-semibold text-gray-800 mb-6">{{ user.username }}'s Code Snippets</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for snippet in snippets %}
+            <div class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition duration-300">
+                <div class="flex justify-between items-center">
+                    <h4 class="text-lg font-bold text-gray-800 truncate">{{ snippet.title }}</h4>
+                    <div class="text-sm text-gray-500">
+                        <p>Language: <span class="font-semibold">{{ snippet.language }}</span></p>
+                        <p>Tags: <span class="font-semibold">{{ snippet.tags }}</span></p>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <pre class="overflow-x-auto bg-gray-100 p-4 rounded-lg shadow-inner text-sm">
+                        <code class="language-{{ snippet.language|lower }}">{{ snippet.content }}</code>
+                    </pre>
+                </div>
+                <!-- Actions Section -->
+            <div class="p-4 border-t border-gray-200 flex justify-between items-center">
+                <div class="text-sm text-gray-500">
+                    <span><i class="fas fa-thumbs-up mr-1"></i> {{ snippet.like_count }}</span>
+                    <span><i class="fas fa-bookmark mr-1"></i> {{ snippet.save_count }}</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    {% if snippet.user_id == current_user.id %}
+                        <a href="{{ url_for('update_snippet', id=snippet.id) }}" class="text-blue-500 hover:underline"><i class="fas fa-edit mr-1"></i></a>
+                        <form action="{{ url_for('delete_snippet', id=snippet.id) }}" method="POST">
+                            <button type="submit" class="text-red-500 hover:underline"><i class="fas fa-trash-alt mr-1"></i></button>
+                        </form>
+                    {% else %}
+                        <!-- Like Button -->
+                        <form action="{{ url_for('like_snippet', id=snippet.id) }}" method="POST">
+                            <button type="submit"
+                                    class="px-3 py-1 bg-gray-100 text-gray-600 rounded-md hover:bg-blue-100 hover:text-blue-600 transition">
+                                {% if snippet.liked_by|selectattr('user_id', 'equalto', current_user.id)|list %}
+                                    <i class="fas fa-thumbs-down mr-1"></i>
+                                {% else %}
+                                    <i class="fas fa-thumbs-up mr-1"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+                        <!-- Save Button -->
+                        <form action="{{ url_for('save_snippet', id=snippet.id) }}" method="POST">
+                            <button type="submit"
+                                    class="px-3 py-1 bg-gray-100 text-gray-600 rounded-md hover:bg-green-100 hover:text-green-600 transition">
+                                {% if snippet.saved_by|selectattr('user_id', 'equalto', current_user.id)|list %}
+                                    <i class="fas fa-bookmark mr-1"></i>
+                                {% else %}
+                                    <i class="fas fa-bookmark mr-1"></i>
+                                {% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function showShareLink(snippetToken) {
+        console.log('Showing share link for token:', snippetToken);
+        document.getElementById('share-link-modal-' + snippetToken).classList.remove('hidden');
+    }
+
+    function copyLink(snippetToken) {
+        console.log('Copying link for token:', snippetToken);
+        const linkInput = document.getElementById('share-link-input-' + snippetToken);
+        linkInput.select();
+        linkInput.setSelectionRange(0, 99999); // For mobile devices
+
+        // Use the Clipboard API to copy the text
+        navigator.clipboard.writeText(linkInput.value).then(function() {
+            alert("Link copied to clipboard!");
+        }).catch(function(err) {
+            console.error('Error copying text: ', err);
+            alert('Failed to copy link.');
+        });
+    }
+
+    function closeShareLink(snippetToken) {
+        console.log('Closing share link for token:', snippetToken);
+        document.getElementById('share-link-modal-' + snippetToken).classList.add('hidden');
+    }
+</script>
+
+{% endblock %}

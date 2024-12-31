@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <h2 class="text-2xl font-bold text-gray-800">Update Snippet</h2>
+
+    <!-- Update Snippet Form -->
+    <form method="POST" class="mt-6">
+        <div class="mb-4">
+            <label for="title" class="block text-sm font-medium text-gray-700">Snippet Title</label>
+            <input type="text" name="title" id="title" value="{{ snippet.title }}" required class="w-full px-4 py-2 border rounded-md">
+        </div>
+        <div class="mb-4">
+            <label for="content" class="block text-sm font-medium text-gray-700">Snippet Content</label>
+            <!-- CodeMirror Editor -->
+            <textarea name="content" id="content" required class="w-full px-4 py-2 border rounded-md">{{ snippet.content }}</textarea>
+        </div>
+        <div class="mb-4">
+            <label for="language" class="block text-sm font-medium text-gray-700">Language</label>
+            <select name="language" id="language" class="w-full px-4 py-2 border rounded-md">
+                <option value="python" {% if snippet.language == 'python' %}selected{% endif %}>Python</option>
+                <option value="javascript" {% if snippet.language == 'javascript' %}selected{% endif %}>JavaScript</option>
+                <option value="c" {% if snippet.language == 'c' %}selected{% endif %}>C</option>
+                <option value="cpp" {% if snippet.language == 'cpp' %}selected{% endif %}>C++</option>
+                <option value="java" {% if snippet.language == 'java' %}selected{% endif %}>Java</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label for="tags" class="block text-sm font-medium text-gray-700">Tags</label>
+            <input type="text" name="tags" id="tags" value="{{ snippet.tags }}" class="w-full px-4 py-2 border rounded-md" placeholder="Tags (comma separated)">
+        </div>
+        <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded">Update Snippet</button>
+    </form>
+</div>
+
+<!-- Include CodeMirror JS and CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/theme/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/python/python.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/javascript/javascript.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.5/mode/java/java.min.js"></script>
+
+<script>
+    // Initialize CodeMirror for the content textarea
+    var codeEditor = CodeMirror.fromTextArea(document.getElementById('content'), {
+        lineNumbers: true,
+        mode: "python", // Default language mode
+        theme: "dracula", // Optional: Change the theme to 'dracula' or any theme of your choice
+        autoCloseBrackets: true,
+        matchBrackets: true,
+        styleActiveLine: true,
+        tabSize: 2
+    });
+
+    // Update the language mode based on the selected language
+    document.getElementById('language').addEventListener('change', function() {
+        var language = this.value;
+        switch(language) {
+            case 'python':
+                codeEditor.setOption("mode", "python");
+                break;
+            case 'javascript':
+                codeEditor.setOption("mode", "javascript");
+                break;
+            case 'java':
+                codeEditor.setOption("mode", "java");
+                break;
+            case 'cpp':
+                codeEditor.setOption("mode", "clike");
+                break;
+            case 'c':
+                codeEditor.setOption("mode", "clike");
+                break;
+            default:
+                codeEditor.setOption("mode", "text/plain");
+        }
+    });
+
+    function syncCodeMirrorContent() {
+        var content = codeEditor.getValue();
+        document.getElementById('content').value = content; // Sync content with the hidden textarea
+    }
+</script>
+{% endblock %}

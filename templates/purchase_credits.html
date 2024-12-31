@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="max-w-md mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-semibold mb-4">Purchase Credits</h2>
+
+    <!-- Display Current Credits -->
+    <div class="mb-4">
+        <p class="text-gray-700 text-lg">Current Credits: <strong>{{ current_user.credits if current_user.credits is not none else 0 }}</strong></p>
+    </div>
+
+    <!-- Purchase Form -->
+    <form method="POST" class="space-y-4">
+        <div class="flex flex-col">
+            <label for="credits" class="text-sm font-medium text-gray-700">Enter the number of credits to purchase:</label>
+            <input type="number" id="credits" name="credits" min="1" required class="mt-1 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+        </div>
+
+        <button type="submit" class="w-full py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            Purchase Credits
+        </button>
+    </form>
+</div>
+{% endblock %}
